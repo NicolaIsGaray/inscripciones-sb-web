@@ -1,0 +1,30 @@
+<main>
+  <section class="hero">
+    <div class="hero__orb hero__orb--one"></div>
+    <div class="hero__orb hero__orb--two"></div>
+    <div class="hero__content">
+      <span class="eyebrow">Inscripciones · Ciclo lectivo 2027</span>
+      <h1>Tu próximo capítulo<br />comienza acá.</h1>
+      <p>
+        Consultá tu estado de inscripción y confirmá tu lugar en la comunidad educativa Libertador Simón Bolívar.
+      </p>
+    </div>
+    <div class="hero__crest">
+  <img src="logoSB.png" class="hero__logo" alt="Escuela Libertador Simón Bolívar 4-084" />
+</div>
+  </section>
+
+  <section class="content-section" id="secundaria">
+    <app-student-list school="secundaria"></app-student-list>
+  </section>
+
+  <div class="academic-divider">
+    <span></span>
+    <app-icon name="school" [size]="24" />
+    <span></span>
+  </div>
+
+  <section class="content-section" id="deportiva">
+    <app-student-list school="deportiva"></app-student-list>
+  </section>
+</main>
