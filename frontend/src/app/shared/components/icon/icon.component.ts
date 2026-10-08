@@ -22,6 +22,12 @@ import { IconName } from '../../../core/models/school.model';
       <ng-container *ngSwitchCase="'plus'"><path d="M12 5v14M5 12h14" /></ng-container>
       <ng-container *ngSwitchCase="'close'"><path d="m6 6 12 12M18 6 6 18" /></ng-container>
       <ng-container *ngSwitchCase="'shield'"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10Z" /><path d="m9 12 2 2 4-5" /></ng-container>
+      <ng-container *ngSwitchCase="'chart'"><path d="M4 19V9M10 19V5M16 19v-7M22 19V2M2 19h22" /></ng-container>
+      <ng-container *ngSwitchCase="'edit'"><path d="m4 16-1 5 5-1L19 9l-4-4L4 16Z" /><path d="m13 7 4 4" /></ng-container>
+      <ng-container *ngSwitchCase="'download'"><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 19h16" /></ng-container>
+      <ng-container *ngSwitchCase="'upload'"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 20h16" /></ng-container>
+      <ng-container *ngSwitchCase="'alert'"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></ng-container>
+      <ng-container *ngSwitchCase="'info'"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></ng-container>
     </svg>
   `
 })

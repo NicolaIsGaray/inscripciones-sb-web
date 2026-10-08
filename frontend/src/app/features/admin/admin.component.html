@@ -1,0 +1,333 @@
+<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <div class="admin-identity">
+      <img src="logoSB.png" alt="Logo" />
+      <div>
+        <strong>Panel administrativo</strong>
+        <small>Ciclo lectivo 2027</small>
+      </div>
+    </div>
+    <nav aria-label="Secciones administrativas">
+      <button [class.active]="section() === 'resumen'" (click)="setSection('resumen')">
+        <app-icon name="chart"></app-icon> Vistazo general
+      </button>
+      <button [class.active]="section() === 'alumnos'" (click)="setSection('alumnos')">
+        <app-icon name="users"></app-icon> Alumnos <span>{{ students().length }}</span>
+      </button>
+      <button [class.active]="section() === 'grupos'" (click)="setSection('grupos')">
+        <app-icon name="school"></app-icon> Grupos <span>{{ groups().length }}</span>
+      </button>
+    </nav>
+    <button class="admin-exit" (click)="logout()">← Volver al sitio</button>
+  </aside>
+
+  <section class="admin-content">
+    <div class="admin-topline">
+      <div>
+        <span class="eyebrow">Administración</span>
+        <h1>{{ section() === 'resumen' ? 'Vistazo general' : section() === 'alumnos' ? 'Alumnos' : 'Grupos' }}</h1>
+      </div>
+      <div class="admin-user">
+        <span>AD</span>
+        <div>
+          <strong>Administración</strong>
+          <small>Usuario autorizado</small>
+        </div>
+      </div>
+    </div>
+
+    @if (notice()) {
+      <div class="admin-notice">
+        <app-icon name="check" [size]="18"></app-icon> {{ notice() }}
+      </div>
+    }
+
+    <!-- SECCIÓN RESUMEN -->
+    @if (section() === 'resumen') {
+      <div class="metric-grid">
+        <article>
+          <span class="metric-icon metric-icon--blue">
+            <app-icon name="users"></app-icon>
+          </span>
+          <div>
+            <small>Alumnos cargados</small>
+            <strong>{{ students().length }}</strong>
+            <em>{{ confirmedCount }} confirmaron su banco</em>
+          </div>
+        </article>
+        <article>
+          <span class="metric-icon metric-icon--pink">
+            <app-icon name="school"></app-icon>
+          </span>
+          <div>
+            <small>Grupos conformados</small>
+            <strong>{{ groups().length }}</strong>
+            <em>{{ groupedStudentCount }} alumnos agrupados</em>
+          </div>
+        </article>
+        <article>
+          <span class="metric-icon metric-icon--gold">
+            <app-icon name="check"></app-icon>
+          </span>
+          <div>
+            <small>Confirmaciones</small>
+            <strong>{{ (confirmedCount / maxStudents * 100 | number:'1.0-0') }}%</strong>
+            <em>del total de ingresantes</em>
+          </div>
+        </article>
+      </div>
+
+      <div class="overview-grid">
+        <article class="admin-panel">
+          <div class="panel-title">
+            <div>
+              <span class="eyebrow">Estado actual</span>
+              <h2>Alumnos</h2>
+            </div>
+            <button (click)="setSection('alumnos')">Ver todos →</button>
+          </div>
+          <div class="progress-row">
+            <span>Banco confirmado</span>
+            <strong>{{ confirmedCount }} de {{ students().length }}</strong>
+          </div>
+          <progress class="progress-track" [value]="confirmedCount" [max]="maxStudents"></progress>
+          <div class="overview-list">
+            @for (student of students().slice(0, 4); track student.id) {
+              <div>
+                <span>{{ student.name.charAt(0) }}</span>
+                <strong>{{ student.name }}</strong>
+                <small [class.confirmed]="student.confirmed">{{ student.confirmed ? 'Confirmado' : 'Pendiente' }}</small>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="admin-panel">
+          <div class="panel-title">
+            <div>
+              <span class="eyebrow">Últimos creados</span>
+              <h2>Grupos</h2>
+            </div>
+            <button (click)="setSection('grupos')">Gestionar →</button>
+          </div>
+          <div class="overview-groups">
+            @for (group of groups(); track group.id) {
+              <div>
+                <span><app-icon name="users" [size]="18"></app-icon></span>
+                <div>
+                  <strong>{{ group.name }}</strong>
+                  <small>{{ group.members.length }} {{ group.members.length === 1 ? 'integrante' : 'integrantes' }} · {{ group.mode }}</small>
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+      </div>
+    }
+
+    <!-- SECCIÓN ALUMNOS -->
+    @if (section() === 'alumnos') {
+      <div class="admin-panel student-panel">
+        <div class="admin-toolbar">
+          <div class="admin-search">
+            <app-icon name="search" [size]="19"></app-icon>
+            <input [value]="studentQuery()" (input)="studentQuery.set($any($event.target).value)" placeholder="Buscar por nombre o DNI" />
+          </div>
+          <div>
+            <input #fileInput class="file-input" type="file" accept=".xlsx" (change)="importStudents($event)" />
+            <a class="template-link" href="/plantilla-alumnos.xlsx" download="plantilla-alumnos.xlsx">
+              <app-icon name="download" [size]="16"></app-icon> Plantilla Requerida
+            </a>
+            <button class="button button--secondary" [disabled]="importing()" (click)="fileInput.click()">
+              <app-icon name="upload" [size]="18"></app-icon>
+              {{ importing() ? 'Importando...' : 'Importar .xlsx' }}
+            </button>
+            <button class="button button--primary" (click)="startNewStudent()">
+              <app-icon name="plus" [size]="18"></app-icon> Nuevo alumno
+            </button>
+          </div>
+        </div>
+
+        <!-- Resultado de la importación -->
+        @if (importResult(); as result) {
+          <div class="import-result" [class.import-result--error]="result.errors.length > 0">
+            <span class="import-result__icon">
+              <app-icon [name]="result.errors.length > 0 ? 'alert' : 'check'" [size]="18"></app-icon>
+            </span>
+            <div class="import-result__body">
+              <strong>
+                {{ result.success }}
+                {{ result.success === 1 ? 'alumno importado' : 'alumnos importados' }}
+                @if (result.errors.length > 0) {
+                  · {{ result.errors.length }}
+                  {{ result.errors.length === 1 ? 'fila omitida' : 'filas omitidas' }}
+                }
+              </strong>
+              @if (result.errors.length > 0) {
+                <p>Revisá el archivo: las filas siguientes no se importaron.</p>
+                <ul>
+                  <li *ngFor="let error of visibleImportErrors">{{ error }}</li>
+                </ul>
+                @if (hiddenImportErrors > 0) {
+                  <small>y {{ hiddenImportErrors }} {{ hiddenImportErrors === 1 ? 'error más' : 'errores más' }}.</small>
+                }
+              }
+            </div>
+            <button class="icon-button" type="button" (click)="dismissImportResult()" aria-label="Cerrar resultado">
+              <app-icon name="close" [size]="18" />
+            </button>
+          </div>
+        }
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>DNI</th>
+                <th>Escuela</th>
+                <th>Instancia</th>
+                <th>Título</th>
+                <th>Estado</th>
+                <th aria-label="Acciones"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (student of filteredStudents; track student.id) {
+                <tr>
+                  <td>
+                    <span class="student-avatar">{{ student.name.charAt(0) }}</span>
+                    <div>
+                      <strong>{{ student.name }}</strong>
+                      <small>{{ student.email || 'Sin correo registrado' }}</small>
+                    </div>
+                  </td>
+                  <td>{{ student.dni }}</td>
+                  <td>{{ student.school }}</td>
+                  <td>{{ student.instance }}</td>
+                  <td>{{ student.title }}</td>
+                  <td>
+                    <span class="admin-status" [class.confirmed]="student.confirmed">
+                      {{ student.confirmed ? 'Confirmado' : 'Pendiente' }}
+                    </span>
+                  </td>
+                  <td>
+                    <button (click)="editStudent(student)" [attr.aria-label]="'Editar a ' + student.name">
+                      <app-icon name="edit" [size]="17"></app-icon>
+                    </button>
+                    <button class="delete" (click)="deleteStudent(student.id)" [attr.aria-label]="'Eliminar a ' + student.name">
+                      <app-icon name="trash" [size]="17"></app-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="table-summary">Mostrando {{ filteredStudents.length }} de {{ students().length }} alumnos</div>
+      </div>
+    }
+
+    <!-- SECCIÓN GRUPOS -->
+    @if (section() === 'grupos') {
+      <div class="groups-toolbar">
+        <p><strong>{{ groups().length }} grupos</strong> conformados para el ciclo lectivo 2027</p>
+      </div>
+      <div class="admin-group-grid">
+        @for (group of groups(); track group.id) {
+          <article class="admin-group-card">
+            <div class="admin-group-card__header">
+              <span><app-icon name="users"></app-icon></span>
+              <div>
+                <small>{{ group.mode }}</small>
+                <h2>{{ group.name }}</h2>
+              </div>
+              <button (click)="deleteAdminGroup(group.id)" [attr.aria-label]="'Eliminar ' + group.name">
+                <app-icon name="trash" [size]="18"></app-icon>
+              </button>
+            </div>
+            <div class="admin-member-list">
+              @for (member of group.members; track member) {
+                <div>
+                  <span>{{ member.charAt(0) }}</span>
+                  <div>
+                    <strong>{{ member }}</strong>
+                    <small>{{ group.members.indexOf(member) === 0 ? 'Líder' : 'Integrante' }}</small>
+                  </div>
+                  @if (group.members.indexOf(member) > 0) {
+                    <button (click)="removeMember(group.id, member)" [attr.aria-label]="'Quitar a ' + member">
+                      <app-icon name="close" [size]="16"></app-icon>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+            <div class="admin-group-card__footer">
+              <span>{{ group.members.length }}/3 lugares ocupados</span>
+              <progress [value]="group.members.length" max="3"></progress>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- MODAL EDITAR/ CREAR ALUMNO -->
+  @if (editingStudent()) {
+    <div class="modal-backdrop">
+      <div class="modal edit-student-modal" role="dialog" aria-modal="true" aria-labelledby="student-form-title">
+        <div class="create-group-header">
+          <span class="modal__group"><app-icon name="users"></app-icon></span>
+          <div>
+            <span class="eyebrow">{{ isNewStudent() ? 'Nuevo registro' : 'Editar registro' }}</span>
+            <h2 id="student-form-title">{{ isNewStudent() ? 'Agregar alumno' : 'Datos del alumno' }}</h2>
+          </div>
+          <button class="icon-button" (click)="editingStudent.set(null)" aria-label="Cerrar">
+            <app-icon name="close"></app-icon>
+          </button>
+        </div>
+        <form class="student-form" (ngSubmit)="saveStudent($event)">
+          <label>
+            <span class="field-label">Nombre completo</span>
+            <input [value]="editingStudent()?.name" (input)="updateStudentField('name', $any($event.target).value)" required />
+          </label>
+          <label>
+            <span class="field-label">DNI</span>
+            <input [value]="editingStudent()?.dni" (input)="updateStudentField('dni', $any($event.target).value.replace(/\D/g, ''))" required />
+          </label>
+          <label>
+            <span class="field-label">Correo electrónico</span>
+            <input type="email" [value]="editingStudent()?.email" (input)="updateStudentField('email', $any($event.target).value)" />
+          </label>
+          <label>
+            <span class="field-label">Escuela</span>
+            <select [value]="editingStudent()?.school" (change)="updateStudentField('school', $any($event.target).value)">
+              <option>Secundaria</option>
+              <option>Deportiva</option>
+            </select>
+          </label>
+          <label>
+            <span class="field-label">Instancia</span>
+            <select [value]="editingStudent()?.instance" (change)="updateStudentField('instance', $any($event.target).value)">
+              <option>Primera instancia</option>
+              <option>Segunda instancia</option>
+              <option>Tercera instancia</option>
+            </select>
+          </label>
+          <label>
+            <span class="field-label">Título</span>
+            <input [value]="editingStudent()?.title" (input)="updateStudentField('title', $any($event.target).value)" />
+          </label>
+          <label class="confirmation-check">
+            <input type="checkbox" [checked]="editingStudent()?.confirmed" (change)="updateStudentField('confirmed', $any($event.target).checked)" />
+            <span>Banco confirmado</span>
+          </label>
+          <div class="student-form__actions">
+            <button type="button" class="button button--secondary" (click)="editingStudent.set(null)">Cancelar</button>
+            <button type="submit" class="button button--primary">Guardar cambios <app-icon name="check" [size]="17"></app-icon></button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

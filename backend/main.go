@@ -7,9 +7,13 @@ import (
 
 	"servidor-angular/config"
 	"servidor-angular/router"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
+	
 	// Conectar a MongoDB
 	if err := config.Connect(); err != nil {
 		log.Fatalf("Error conectando a MongoDB: %v", err)

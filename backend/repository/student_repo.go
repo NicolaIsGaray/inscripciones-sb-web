@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // StudentRepository handles database operations for students
@@ -87,6 +88,7 @@ func (r *StudentRepository) Update(id primitive.ObjectID, student *models.Studen
 			"email":     student.Email,
 			"instance":  student.Instance,
 			"title":     student.Title,
+			"school":    student.School,
 			"hasGroup":  student.HasGroup,
 			"alone":     student.Alone,
 			"confirmed": student.Confirmed,
@@ -103,6 +105,49 @@ func (r *StudentRepository) Update(id primitive.ObjectID, student *models.Studen
 	}
 
 	return nil
+}
+
+// FindAllDNIs devuelve todos los DNI ya registrados, para detectar duplicados al importar
+func (r *StudentRepository) FindAllDNIs() ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	values, err := r.collection.Distinct(ctx, "dni", bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	dnis := make([]string, 0, len(values))
+	for _, value := range values {
+		if dni, ok := value.(string); ok {
+			dnis = append(dnis, dni)
+		}
+	}
+
+	return dnis, nil
+}
+
+// Confirm marca el banco como confirmado y carga el email del ingresante.
+// Solo toca esos dos campos: el resto de la ficha queda intacto.
+func (r *StudentRepository) Confirm(id primitive.ObjectID, email string) (*models.Student, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	var student models.Student
+	err := r.collection.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": id},
+		bson.M{"$set": bson.M{"confirmed": true, "email": email}},
+		opts,
+	).Decode(&student)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &student, nil
 }
 
 // Delete removes a student

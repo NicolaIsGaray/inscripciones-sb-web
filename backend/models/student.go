@@ -10,6 +10,7 @@ type Student struct {
 	Email       string             `json:"email" bson:"email"`
 	Instance    string             `json:"instance" bson:"instance"`
 	Title       string             `json:"title" bson:"title"`
+	School      string             `json:"school" bson:"school"`
 	HasGroup    bool               `json:"hasGroup" bson:"hasGroup"`
 	Alone       bool               `json:"alone" bson:"alone"`
 	Confirmed   bool               `json:"confirmed" bson:"confirmed"`
