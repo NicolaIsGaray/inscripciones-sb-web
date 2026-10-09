@@ -4,9 +4,14 @@
 # Uso: en Render, New > Blueprint, apuntando a este repositorio.
 # Las variables marcadas como `sync: false` se piden al crear el blueprint.
 #
-# IMPORTANTE: creá primero el servicio de la API. El sitio estático toma
-# automáticamente el hostname público de la API, así que el orden importa solo
-# si querés ver la URL final en el log del build del frontend.
+# Dominios custom (ver backend/.env.example para el resto):
+#   Frontend -> https://www.simonbolivar4084.com
+#   API      -> https://api.simonbolivar4084.com
+#
+# ALLOWED_ORIGINS y API_URL son valores LITERALES a propósito: antes usaban
+# fromService -> RENDER_EXTERNAL_HOSTNAME, que siempre devuelve el hostname
+# .onrender.com y nunca el dominio custom. Con dominios propios eso dejaba de
+# funcionar (CORS 403 y frontend apuntando a la URL interna).
 
 services:
   # ------------------------------------------------------------------
@@ -37,10 +42,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ALLOWED_ORIGINS
-        fromService:
-          name: inscripciones-sb
-          type: web
-          envVarKey: RENDER_EXTERNAL_HOSTNAME
+        # Orígenes del frontend. CORS es por ORIGEN (quién llama), no por
+        # destino, así que acá va el dominio del sitio, no el de la API.
+        # El backend acepta valores con o sin esquema (ver router.go).
+        value: https://www.simonbolivar4084.com,https://simonbolivar4084.com
 
   # ------------------------------------------------------------------
   # 2) Frontend Angular (sitio estático)
@@ -75,10 +80,7 @@ services:
         name: Referrer-Policy
         value: strict-origin-when-cross-origin
     envVars:
-      # Se completa solo con el hostname público de la API.
-      # El script set-api-url.js le agrega https://
+      # URL del backend tal como la ve el navegador. El script set-api-url.js
+      # le agrega https:// y /api si faltan.
       - key: API_URL
-        fromService:
-          name: inscripciones-sb-api
-          type: web
-          envVarKey: RENDER_EXTERNAL_HOSTNAME
+        value: https://api.simonbolivar4084.com
