@@ -1,9 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { RouterLink, RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
+import { IconName } from './core/models/school.model';
+import { IconComponent } from './shared/components/icon/icon.component';
 
 @Component({
-  imports: [RouterModule, RouterLink],
+  imports: [RouterModule, RouterLink, IconComponent],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
@@ -13,10 +15,14 @@ export class App implements OnInit {
 
   currentPage = signal<string>("/inicio");
 
-  navItems = [
-    { route: "/inicio", label: "Inicio" as const },
-    { route: "/grupos", label: "Grupos" as const },
-    { route: "/fechas", label: "Fechas" as const },
+  // El panel de administración ocupa toda la pantalla: sin header, barra
+  // inferior ni footer del sitio (ver .app--admin en styles.css)
+  isAdmin = computed(() => this.currentPage().startsWith('/admin'));
+
+  navItems: { route: string; label: string; icon: IconName }[] = [
+    { route: "/inicio", label: "Inicio", icon: "home" },
+    { route: "/grupos", label: "Grupos", icon: "users" },
+    { route: "/fechas", label: "Fechas", icon: "calendar" },
   ];
 
   constructor(private router: Router) {}

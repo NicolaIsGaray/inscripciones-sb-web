@@ -18,6 +18,7 @@ func NewRouter() *mux.Router {
 	studentHandler := handlers.NewStudentHandler()
 	groupHandler := handlers.NewGroupHandler()
 	invitationHandler := handlers.NewInvitationHandler()
+	settingHandler := handlers.NewSettingHandler()
 
 	// Rutas públicas
 	r.HandleFunc("/api/login", handlers.Login).Methods("POST")
@@ -37,6 +38,10 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/api/invitations", invitationHandler.CreateInvitation).Methods("POST")
 	r.HandleFunc("/api/invitations/{groupId}", invitationHandler.UpdateInvitation).Methods("PUT")
 
+	// Rutas de Settings: SOLO lectura es pública.
+	// La habilitación de grupos se cambia bajo /api/admin (protegida con JWT).
+	r.HandleFunc("/api/settings", settingHandler.GetSettings).Methods("GET")
+
 	// Rutas protegidas de administración
 	admin := r.PathPrefix("/api/admin").Subrouter()
 	admin.Use(handlers.AuthMiddleware)
@@ -52,6 +57,8 @@ func NewRouter() *mux.Router {
 	admin.HandleFunc("/groups/{id}", groupHandler.UpdateGroup).Methods("PUT")
 	admin.HandleFunc("/groups/{id}", groupHandler.DeleteGroup).Methods("DELETE")
 	admin.HandleFunc("/groups/{id}/members/{memberId}", groupHandler.RemoveMember).Methods("DELETE")
+
+	admin.HandleFunc("/settings", settingHandler.UpdateSettings).Methods("PATCH")
 
 	return r
 }
@@ -127,7 +134,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 			w.Header().Add("Vary", "Origin")
 		}
 
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 		if r.Method == "OPTIONS" {

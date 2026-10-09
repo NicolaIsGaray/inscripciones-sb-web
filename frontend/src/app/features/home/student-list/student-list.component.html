@@ -47,36 +47,53 @@
       </div>
     </div>
 
-    <!-- Table Header (Desktop) -->
-    <div class="table-head">
-      <span>Instancia</span>
-      <span>Postulante / Título</span>
-      <span class="cell-confirm">Estado</span>
+    <!-- Empty state: sin alumnos cargados o sin coincidencia de filtros -->
+    <div class="empty-state" *ngIf="filtered().length === 0">
+      <ng-container *ngIf="students().length === 0; else noMatches">
+        <span><app-icon name="info" [size]="26" /></span>
+        <h2>Todavía no hay ingresantes cargados</h2>
+        <p>Aún no se han publicado las listas de los ingresantes. Volvé a consultar en otro momento.</p>
+      </ng-container>
+      <ng-template #noMatches>
+        <span><app-icon name="search" [size]="26" /></span>
+        <h2>Sin resultados</h2>
+        <p>No hay ingresantes que coincidan con los filtros seleccionados.</p>
+      </ng-template>
     </div>
 
-    <!-- Table Rows -->
-    <div class="table-row" *ngFor="let item of paginatedStudents()">
-      <span class="cell-instance" data-label="Instancia">{{ item.instance }}</span>
-      <span class="cell-name" data-label="Postulante">
-        <span class="cell-name__text">{{ item.name }}</span>
-        <small class="cell-title">{{ item.title }}</small>
-      </span>
-      <span class="cell-confirm" data-label="Estado">
-        <span class="confirm-icon" [ngClass]="{ confirmed: item.confirmed }">
-          <app-icon [name]="item.confirmed ? 'check' : 'close'" [size]="12"></app-icon>
+    <!-- Table (solo cuando hay resultados) -->
+    <ng-container *ngIf="filtered().length > 0">
+      <!-- Table Header (Desktop) -->
+      <div class="table-head">
+        <span>Instancia</span>
+        <span>Postulante / Título</span>
+        <span class="cell-confirm">Estado</span>
+      </div>
+
+      <!-- Table Rows -->
+      <div class="table-row" *ngFor="let item of paginatedStudents()">
+        <span class="cell-instance" data-label="Instancia">{{ item.instance }}</span>
+        <span class="cell-name" data-label="Postulante">
+          <span class="cell-name__text">{{ item.name }}</span>
+          <small class="cell-title">{{ item.title }}</small>
         </span>
-      </span>
-    </div>
+        <span class="cell-confirm" data-label="Estado">
+          <span class="confirm-icon" [ngClass]="{ confirmed: item.confirmed }">
+            <app-icon [name]="item.confirmed ? 'check' : 'close'" [size]="12"></app-icon>
+          </span>
+        </span>
+      </div>
 
-    <!-- Pagination -->
-    <div class="pagination">
-      <span>Página {{ currentPage() }} de {{ totalPages() || 1 }}</span>
-      <button (click)="changePage(-1)" [disabled]="currentPage() === 1">&lt;</button>
-      <button (click)="changePage(1)" [disabled]="currentPage() >= totalPages()">&gt;</button>
-    </div>
+      <!-- Pagination -->
+      <div class="pagination">
+        <span>Página {{ currentPage() }} de {{ totalPages() || 1 }}</span>
+        <button (click)="changePage(-1)" [disabled]="currentPage() === 1">&lt;</button>
+        <button (click)="changePage(1)" [disabled]="currentPage() >= totalPages()">&gt;</button>
+      </div>
+    </ng-container>
 
     <!-- Confirmation Flow: State 1 - Initial CTA -->
-    <div class="confirm-cta" *ngIf="!confirming() && !justConfirmed()">
+    <div class="confirm-cta" *ngIf="!confirming() && !justConfirmed() && students().length > 0">
       <div>
         <strong>¿Encontraste tu nombre?</strong>
         <span>Completá la verificación para reservar tu lugar.</span>
