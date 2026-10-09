@@ -127,3 +127,43 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// RemoveMember handles DELETE /api/admin/groups/{id}/members/{memberId}
+func (h *GroupHandler) RemoveMember(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := primitive.ObjectIDFromHex(vars["id"])
+	if err != nil {
+		http.Error(w, "ID inválido", http.StatusBadRequest)
+		return
+	}
+	memberId := vars["memberId"]
+
+	// Obtener el grupo
+	group, err := h.repo.FindByID(id)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			http.Error(w, "Grupo no encontrado", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Error al obtener grupo", http.StatusInternalServerError)
+		return
+	}
+
+	// Filtrar el miembro a eliminar
+	var newMembers []models.Student
+	for _, member := range group.Members {
+		if member.ID.Hex() != memberId {
+			newMembers = append(newMembers, member)
+		}
+	}
+	group.Members = newMembers
+
+	// Actualizar el grupo
+	if err := h.repo.Update(id, group); err != nil {
+		http.Error(w, "Error al actualizar grupo", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(group)
+}

@@ -18,60 +18,32 @@
         <div class="filter-group">
           <span class="field-label">Instancias</span>
           <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Primera Instancia</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Segunda Instancia</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Tercera Instancia</span>
+            <label class="checkbox-label" *ngFor="let instance of availableInstances()">
+              <input
+                type="checkbox"
+                [checked]="selectedInstances().includes(instance)"
+                (change)="toggleInstance(instance)"
+              />
+              <span>{{ instance }}</span>
             </label>
           </div>
         </div>
         <div class="filter-group">
           <span class="field-label">Título</span>
           <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>CUD</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Hermanos</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Hijo de Personal</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Escuela cercana a 300m</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Cercanía a Domicilio</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Abanderado/Escolta</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Feria Virtual GEI</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" (change)="applyFilters()" />
-              <span>Supervisión</span>
+            <label class="checkbox-label" *ngFor="let title of availableTitles()">
+              <input
+                type="checkbox"
+                [checked]="selectedTitles().includes(title)"
+                (change)="toggleTitle(title)"
+              />
+              <span>{{ title }}</span>
             </label>
           </div>
         </div>
       </div>
       <div class="filter-actions">
-        <div class="result-count">{{ filteredStudents.length }} resultados</div>
+        <div class="result-count">{{ filtered().length }} resultados</div>
       </div>
     </div>
 
@@ -83,11 +55,12 @@
     </div>
 
     <!-- Table Rows -->
-    <div class="table-row" *ngFor="let item of paginatedStudents">
+    <div class="table-row" *ngFor="let item of paginatedStudents()">
       <span class="cell-instance" data-label="Instancia">{{ item.instance }}</span>
-      <span class="cell-name" data-label="Postulante"
-        >{{ item.name }} <small class="cell-title">{{ item.title }}</small></span
-      >
+      <span class="cell-name" data-label="Postulante">
+        <span class="cell-name__text">{{ item.name }}</span>
+        <small class="cell-title">{{ item.title }}</small>
+      </span>
       <span class="cell-confirm" data-label="Estado">
         <span class="confirm-icon" [ngClass]="{ confirmed: item.confirmed }">
           <app-icon [name]="item.confirmed ? 'check' : 'close'" [size]="12"></app-icon>
@@ -97,9 +70,9 @@
 
     <!-- Pagination -->
     <div class="pagination">
-      <span>Página {{ currentPage }} de {{ totalPages || 1 }}</span>
-      <button (click)="changePage(-1)" [disabled]="currentPage === 1">&lt;</button>
-      <button (click)="changePage(1)" [disabled]="currentPage >= totalPages">&gt;</button>
+      <span>Página {{ currentPage() }} de {{ totalPages() || 1 }}</span>
+      <button (click)="changePage(-1)" [disabled]="currentPage() === 1">&lt;</button>
+      <button (click)="changePage(1)" [disabled]="currentPage() >= totalPages()">&gt;</button>
     </div>
 
     <!-- Confirmation Flow: State 1 - Initial CTA -->
@@ -149,10 +122,13 @@
         <label>
           <span class="field-label">Correo electrónico</span>
           <input [(ngModel)]="email" [ngModelOptions]="{standalone: true}" type="email" placeholder="nombre@correo.com" />
+          <small class="field-error" *ngIf="invalidEmail()">Ingresá un correo electrónico válido.</small>
         </label>
-        <button type="submit" [disabled]="!email().trim()">
-          Confirmar banco <app-icon name="check" [size]="18" />
+        <button type="submit" [disabled]="!email().trim() || invalidEmail() || submitting()">
+          <ng-container *ngIf="!submitting()">Confirmar banco <app-icon name="check" [size]="18" /></ng-container>
+          <ng-container *ngIf="submitting()">Confirmando...</ng-container>
         </button>
+        <small class="field-error" *ngIf="confirmError()">{{ confirmError() }}</small>
       </div>
     </form>
 

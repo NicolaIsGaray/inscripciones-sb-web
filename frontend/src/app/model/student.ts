@@ -7,6 +7,7 @@ export class Student {
     email!: string;
     instance!: string;
     title!: string;
+    school!: 'secundaria' | 'deportiva';
     hasGroup!: boolean;
     alone!: boolean;
     confirmed!: boolean;
