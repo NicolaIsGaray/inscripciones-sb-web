@@ -1,0 +1,84 @@
+# Blueprint de despliegue para Render.
+# Spec: https://render.com/docs/blueprint-spec
+#
+# Uso: en Render, New > Blueprint, apuntando a este repositorio.
+# Las variables marcadas como `sync: false` se piden al crear el blueprint.
+#
+# IMPORTANTE: creá primero el servicio de la API. El sitio estático toma
+# automáticamente el hostname público de la API, así que el orden importa solo
+# si querés ver la URL final en el log del build del frontend.
+
+services:
+  # ------------------------------------------------------------------
+  # 1) API en Go
+  # ------------------------------------------------------------------
+  - type: web
+    name: inscripciones-sb-api
+    runtime: go
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: go build -o api .
+    startCommand: ./api
+    healthCheckPath: /api/students
+    # No recompilar la API cuando solo cambian archivos del frontend
+    buildFilter:
+      paths:
+        - backend/**
+      ignoredPaths:
+        - backend/tmp_import_test/**
+    envVars:
+      - key: MONGODB_URI
+        sync: false # URI de MongoDB Atlas
+      - key: ADMIN_USERNAME
+        sync: false # usuario del dashboard (admin)
+      - key: ADMIN_PASSWORD
+        sync: false # hash bcrypt de la contraseña, entre comillas simples
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        fromService:
+          name: inscripciones-sb
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+
+  # ------------------------------------------------------------------
+  # 2) Frontend Angular (sitio estático)
+  # ------------------------------------------------------------------
+  - type: web
+    name: inscripciones-sb
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build:render
+    staticPublishPath: ./dist/sb-web/browser
+    # No recompilar el sitio cuando solo cambian archivos del backend
+    buildFilter:
+      paths:
+        - frontend/**
+      ignoredPaths:
+        - frontend/dist/**
+    previews:
+      generation: off
+    routes:
+      # SPA: /fechas, /grupos, /admin se resuelven contra index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: sameorigin
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    envVars:
+      # Se completa solo con el hostname público de la API.
+      # El script set-api-url.js le agrega https://
+      - key: API_URL
+        fromService:
+          name: inscripciones-sb-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME

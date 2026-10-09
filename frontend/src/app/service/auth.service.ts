@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { API_URL } from '../core/config/api-url.token';
 
 export interface LoginRequest {
   username: string;
@@ -15,7 +16,7 @@ export interface LoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = inject(API_URL);
   private tokenKey = 'auth_token';
 
   constructor(private http: HttpClient) {}

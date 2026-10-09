@@ -3,8 +3,116 @@
     <span class="eyebrow">Agenda de ingreso</span>
     <h1>Fechas importantes</h1>
     <div class="intro-copy">
-      <p>Guardá estas fechas para completar cada etapa de la inscripción.</p>
+      <p>
+        Guardá estas fechas para completar cada etapa de la inscripción al
+        <strong>primer año del ciclo lectivo 2027.</strong>
+      </p>
     </div>
   </div>
-  <!-- Contenido de fechas... -->
+
+  <!-- INSTANCIAS -->
+  <div class="stage-list">
+    @for (stage of stages; track stage.id) {
+      <article class="stage-card" [ngClass]="'stage-card--' + stage.tone">
+        <header class="stage-card__head">
+          <span class="stage-card__badge">{{ stage.order }}</span>
+          <span class="stage-card__icon">
+            <app-icon [name]="stage.icon" [size]="20" />
+          </span>
+          <h2>
+            {{ stage.title }}
+            @if (stage.subtitle) {
+              <small>{{ stage.subtitle }}</small>
+            }
+          </h2>
+        </header>
+
+        <!-- Primera instancia: matriz de categorías -->
+        @if (stage.categories) {
+          <div class="stage-matrix">
+            <div class="stage-matrix__head">
+              <span>Categoría</span>
+              <span>Preinscripción</span>
+              <span>Publicación web</span>
+              <span>Inscripción</span>
+            </div>
+
+            @for (category of stage.categories; track category.id) {
+              <div class="stage-row">
+                <div class="stage-row__name">
+                  <span>{{ category.category }}</span>
+                  @if (category.priority) {
+                    <em>{{ category.priority }}</em>
+                  }
+                  @if (category.note) {
+                    <small>{{ category.note }}</small>
+                  }
+                </div>
+                <div class="stage-row__date stage-row__date--pre" data-label="Preinscripción">
+                  {{ category.steps.preinscripcion }}
+                </div>
+                <div class="stage-row__date stage-row__date--pub" data-label="Publicación">
+                  {{ category.steps.publicacion }}
+                </div>
+                <div class="stage-row__date stage-row__date--ins" data-label="Inscripción">
+                  {{ category.steps.inscripcion }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Instancias 2, 3 y 4: lista de fechas -->
+        @if (stage.events) {
+          <ul class="stage-events">
+            @for (event of stage.events; track event.date + event.label) {
+              <li>
+                <strong>{{ event.date }}</strong>
+                <span>
+                  {{ event.label }}
+                  @if (event.note) {
+                    <small>{{ event.note }}</small>
+                  }
+                </span>
+              </li>
+            }
+          </ul>
+        }
+
+        <!-- Fila destacada -->
+        @if (stage.banner; as banner) {
+          <div class="stage-banner">
+            <app-icon name="calendar" [size]="18" />
+            <strong>{{ banner.date }}</strong>
+            <span>{{ banner.label }}</span>
+          </div>
+        }
+      </article>
+    }
+  </div>
+
+  <!-- DATOS COMPLEMENTARIOS -->
+  <div class="extra-grid">
+    @for (extra of extras; track extra.id) {
+      <article class="extra-card">
+        <header>
+          <span><app-icon [name]="extra.icon" [size]="18" /></span>
+          <h3>{{ extra.title }}</h3>
+        </header>
+        <dl>
+          @for (item of extra.items; track item.label) {
+            <div>
+              <dt>{{ item.label }}</dt>
+              <dd>{{ item.value }}</dd>
+            </div>
+          }
+        </dl>
+      </article>
+    }
+  </div>
+
+  <p class="stage-note">
+    Las publicaciones web se realizan únicamente en la web de la institución. Todo el
+    proceso se rige por el <strong>MEMO-2026-275-DGEMZA</strong>.
+  </p>
 </main>
