@@ -356,13 +356,12 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
   .section-heading-row .button { width: 100%; }
   .stage-card__head { padding: 17px 18px; }
   .stage-card__head h2 { font-size: 18px; }
-  .stage-matrix__head { display: none; }
-  /* En móvil la matriz se apila en filas: las 3 columnas con la etiqueta larga
-     ("PREINSCRIPCIÓN") no entraban en pantallas chicas y desbordaban en horizontal */
-  .stage-row { padding: 15px 18px; display: grid; grid-template-columns: 1fr; gap: 8px; }
-  .stage-row__name { margin-bottom: 2px; }
-  .stage-row__date { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 13px; }
-  .stage-row__date::before { content: attr(data-label); margin: 0; font-size: 9px; }
+  /* La matriz conserva sus 4 columnas y se desliza en horizontal: en mobile se
+     necesitan las cabeceras, y la columna de categorías queda fija al deslizar */
+  .stage-matrix__head, .stage-row { padding: 0 18px; }
+  .stage-matrix__head { font-size: 8px; letter-spacing: .04em; }
+  .stage-row { gap: 10px; }
+  .stage-matrix-hint { display: flex; }
   .stage-events { padding: 6px 18px; }
   .stage-events li { grid-template-columns: 1fr; gap: 4px; justify-items: start; }
   .stage-banner { align-items: flex-start; flex-wrap: wrap; padding: 14px 18px; }
@@ -389,6 +388,16 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
 .stage-card__head h2 { margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; font-size: 21px; }
 .stage-card__head h2 small { color: var(--ink-muted); font-family: var(--sans); font-size: 12px; font-weight: 600; }
 .stage-matrix__head, .stage-row { display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 12px; align-items: center; padding: 0 23px; }
+/* La tabla no se comprime por debajo de este ancho: en pantallas chicas se
+   desliza en horizontal en lugar de recortar los datos de las fechas */
+.stage-matrix { min-width: 560px; }
+.stage-matrix-wrap { overflow-x: auto; overscroll-behavior-x: contain; }
+/* La columna de categorías se ancla al borde izquierdo durante el deslizamiento */
+.stage-matrix__head > span:first-child, .stage-row__name { position: sticky; left: 0; z-index: 1; background: white; }
+.stage-matrix__head > span:first-child { background: #faf8f9; }
+.stage-row__name { padding-right: 12px; box-shadow: 1px 0 0 var(--line); }
+.stage-matrix-hint { display: none; align-items: center; gap: 7px; margin: 0; padding: 11px 18px 14px; border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 10px; font-weight: 600; }
+.stage-matrix-hint svg { color: var(--blue); }
 .stage-matrix__head { min-height: 42px; background: #faf8f9; border-bottom: 1px solid var(--line); color: var(--ink-muted); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .stage-row { min-height: 66px; border-bottom: 1px solid var(--line); }
 .stage-row:last-child { border-bottom: 0; }
@@ -410,7 +419,7 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
 .stage-banner strong { font-size: 12px; white-space: nowrap; }
 .stage-banner span { color: var(--ink); font-size: 12px; line-height: 1.45; }
 .extra-grid { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
-.extra-card { min-width: 0; padding: 21px 23px; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: var(--shadow-sm); overflow-wrap: break-word; display: flex; align-items: flex-start; gap: 24px; }
+.extra-card { min-width: 0; padding: 21px 23px; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: var(--shadow-sm); overflow-wrap: break-word; display: flex; align-items: center; gap: 24px; }
 .extra-card header { display: flex; align-items: center; gap: 11px; flex-shrink: 0; }
 .extra-card header > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: var(--gold-soft); color: #8f6508; }
 .extra-card h3 { margin: 0; font-size: 16px; }
