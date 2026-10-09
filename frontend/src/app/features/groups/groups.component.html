@@ -10,5 +10,27 @@
       </p>
     </div>
   </div>
-  <!-- Contenido de grupos... -->
+
+  <div class="availability-card" [class.available]="groupsEnabled()">
+    <span class="availability-card__icon">
+      <app-icon [name]="groupsEnabled() ? 'users' : 'clock'" [size]="28" />
+    </span>
+    <div>
+      <span class="eyebrow">{{ groupsEnabled() ? 'Etapa abierta' : 'Próximamente' }}</span>
+      <h2>{{ groupsEnabled() ? 'Grupos ya disponibles' : 'Grupos deshabilitados' }}</h2>
+      <p>
+        @if (groupsEnabled()) {
+          Ya se encuentran disponibles los grupos. Recordá que podés crear tu grupo con
+          <strong>dos ingresantes</strong> o comenzar el ciclo lectivo <strong>en solitario</strong>.
+          Revisá tus invitaciones pendientes.
+        } @else {
+          Por el momento, la formación de grupos está <strong>cerrada</strong>. Asegurate de haber
+          confirmado tu banco y esperá la notificación que enviaremos a tu
+          <strong>correo electrónico</strong>.
+        }
+      </p>
+    </div>
+  </div>
+
+  <!-- Grid de grupos: sólo visible con la etapa habilitada (pendiente) -->
 </main>

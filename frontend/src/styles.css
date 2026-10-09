@@ -200,6 +200,7 @@ h1, h2, h3 { font-family: var(--serif); }
 .availability-card__icon { width: 56px; height: 56px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 16px; background: rgba(255,255,255,.13); }
 .available .availability-card__icon { background: white; color: var(--blue-dark); }
 .availability-card .eyebrow { color: #fff; }
+.availability-card.available .eyebrow { color: var(--blue-dark); }
 .availability-card h2 { margin-bottom: 10px; font-size: 27px; }
 .availability-card p { max-width: 750px; margin: 0; color: rgba(255,255,255,.72); line-height: 1.65; }
 .availability-card.available p { color: var(--ink-muted); }
@@ -356,14 +357,15 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
   .stage-card__head { padding: 17px 18px; }
   .stage-card__head h2 { font-size: 18px; }
   .stage-matrix__head { display: none; }
-  .stage-row { padding: 15px 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .stage-row__name { grid-column: 1 / -1; margin-bottom: 4px; }
-  .stage-row__date { padding: 6px 4px; }
-  .stage-row__date::before { content: attr(data-label); display: block; margin-bottom: 3px; color: var(--ink-muted); font-size: 8px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  /* En móvil la matriz se apila en filas: las 3 columnas con la etiqueta larga
+     ("PREINSCRIPCIÓN") no entraban en pantallas chicas y desbordaban en horizontal */
+  .stage-row { padding: 15px 18px; display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .stage-row__name { margin-bottom: 2px; }
+  .stage-row__date { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 13px; }
+  .stage-row__date::before { content: attr(data-label); margin: 0; font-size: 9px; }
   .stage-events { padding: 6px 18px; }
-  .stage-events li { grid-template-columns: 118px 1fr; gap: 11px; }
+  .stage-events li { grid-template-columns: 1fr; gap: 4px; justify-items: start; }
   .stage-banner { align-items: flex-start; flex-wrap: wrap; padding: 14px 18px; }
-  .extra-grid { grid-template-columns: 1fr; }
   .date-banner { align-items: flex-start; }
   .timeline-item { grid-template-columns: 58px 20px 1fr; gap: 10px; }
   .date-block { width: 58px; height: 62px; }
@@ -407,14 +409,13 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
 .stage-banner { display: flex; align-items: center; gap: 11px; padding: 15px 23px; border-top: 1px solid var(--line); background: var(--stage-soft); color: var(--stage-color); }
 .stage-banner strong { font-size: 12px; white-space: nowrap; }
 .stage-banner span { color: var(--ink); font-size: 12px; line-height: 1.45; }
-.extra-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-.extra-card { padding: 21px 23px; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: var(--shadow-sm); }
-.extra-card header { display: flex; align-items: center; gap: 11px; margin-bottom: 15px; }
+.extra-grid { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.extra-card { min-width: 0; padding: 21px 23px; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: var(--shadow-sm); overflow-wrap: break-word; display: flex; align-items: flex-start; gap: 24px; }
+.extra-card header { display: flex; align-items: center; gap: 11px; flex-shrink: 0; }
 .extra-card header > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: var(--gold-soft); color: #8f6508; }
 .extra-card h3 { margin: 0; font-size: 16px; }
-.extra-card dl { margin: 0; }
-.extra-card dl > div { padding: 9px 0; border-top: 1px solid var(--line); }
-.extra-card dl > div:first-child { padding-top: 0; border-top: 0; }
+.extra-card dl { margin: 0; flex: 1; display: flex; flex-wrap: wrap; gap: 14px 28px; }
+.extra-card dl > div { min-width: 0; }
 .extra-card dt { color: var(--ink-muted); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .extra-card dd { margin: 3px 0 0; font-size: 12px; font-weight: 600; }
 .stage-note { margin: 22px 0 0; padding: 15px 19px; border-left: 4px solid var(--gold); border-radius: 0 12px 12px 0; background: white; color: var(--ink-muted); font-size: 12px; line-height: 1.5; box-shadow: var(--shadow-sm); }
@@ -432,8 +433,16 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
 .admin-sidebar nav button { width: 100%; min-height: 47px; padding: 0 13px; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 10px; background: transparent; color: rgba(255,255,255,.62); font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; }
 .admin-sidebar nav button:hover, .admin-sidebar nav button.active { background: rgba(255,255,255,.1); color: white; }
 .admin-sidebar nav button.active svg { color: var(--pink); }
-.admin-sidebar nav button span { margin-left: auto; min-width: 23px; padding: 3px 6px; border-radius: 999px; background: rgba(255,255,255,.1); font-size: 9px; text-align: center; }
+/* En click/toque se oculta el anillo por defecto del navegador (el estado
+   activo ya da feedback); con teclado se mantiene visible, en blanco sobre el azul */
+.admin-sidebar nav button:focus { outline: none; }
+.admin-sidebar nav button:focus-visible { outline: 2px solid rgba(255,255,255,.7); outline-offset: 2px; }
+/* Contador pegado al label (sin margin-left:auto) para que los tres botones
+   del nav se vean iguales: "Vistazo general" no lleva contador */
+.admin-sidebar nav button span { flex: 0 0 auto; min-width: 22px; padding: 2px 6px; border-radius: 999px; background: rgba(255,255,255,.12); font-size: 10px; line-height: 1.4; text-align: center; }
 .admin-exit { margin-top: auto; min-height: 43px; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; background: transparent; color: rgba(255,255,255,.7); font-weight: 600; cursor: pointer; }
+/* La salida compacta del header solo se usa en móvil (desktop usa .admin-exit) */
+.admin-signout { display: none; }
 .admin-content { min-width: 0; padding: 42px clamp(24px, 4vw, 62px) 70px; }
 .admin-topline { margin-bottom: 31px; display: flex; align-items: center; justify-content: space-between; }
 .admin-topline .eyebrow { margin-bottom: 5px; }
@@ -455,6 +464,13 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
 .metric-grid strong { margin: 6px 0 5px; font-family: var(--serif); font-size: 31px; }
 .metric-grid em { color: var(--ink-muted); font-size: 10px; font-style: normal; }
 .overview-grid { margin-top: 18px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; }
+.groups-availability { margin-top: 18px; }
+.groups-availability__body { padding: 20px 23px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.groups-availability__info { min-width: 0; display: flex; align-items: center; gap: 14px; }
+.groups-availability__state { flex: 0 0 auto; padding: 6px 12px; display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; background: var(--pink-soft); color: var(--danger); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.groups-availability__state.is-open { background: var(--cream); color: #587126; }
+.groups-availability__info p { margin: 0; color: var(--ink-muted); font-size: 12px; line-height: 1.55; }
+.switch:disabled { opacity: .5; cursor: not-allowed; }
 .admin-panel { overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: white; box-shadow: var(--shadow-sm); }
 .panel-title { padding: 22px 23px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .panel-title .eyebrow { margin-bottom: 4px; }
@@ -546,20 +562,26 @@ footer { min-height: 160px; padding: 45px max(5vw,24px); display: flex; align-it
 
 @media (max-width: 800px) {
   .app--admin { padding-bottom: 0; }
-  .admin-shell { grid-template-columns: 1fr; }
+  /* Sidebar con su alto natural y el contenido ocupando el resto: sin esto las
+     filas `auto` del grid se estiran (align-content por defecto = stretch) y la
+     barra del panel crece cuando la sección tiene poco contenido */
+.admin-shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   .admin-sidebar { position: static; height: auto; padding: 14px 16px; }
   .admin-identity { padding: 0 0 13px; }
   .admin-sidebar nav { margin-top: 13px; grid-template-columns: repeat(3, 1fr); gap: 5px; }
   .admin-sidebar nav button { min-height: 58px; padding: 7px 4px; flex-direction: column; justify-content: center; gap: 3px; font-size: 9px; text-align: center; }
   .admin-sidebar nav button span { display: none; }
-  .admin-exit { position: absolute; top: 18px; right: 16px; width: 40px; min-height: 40px; overflow: hidden; color: transparent; }
-  .admin-exit::after { content: "←"; position: absolute; inset: 0; display: grid; place-items: center; color: white; font-size: 18px; }
+  /* En móvil no se muestra el botón "Volver al sitio" */
+  .admin-exit { display: none; }
+  .admin-signout { margin-left: auto; padding: 7px 11px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,.16); border-radius: 8px; background: transparent; color: rgba(255,255,255,.75); font-size: 11px; font-weight: 600; cursor: pointer; }
   .admin-content { padding: 28px 16px 50px; }
-  .admin-topline { align-items: flex-start; }
-  .admin-user { display: none; }
-  .admin-topline h1 { font-size: 30px; }
+  /* En móvil se oculta el header: el navbar ya muestra la sección activa */
+  .admin-topline { display: none; }
   .metric-grid { grid-template-columns: 1fr; }
   .overview-grid { grid-template-columns: 1fr; }
+  .groups-availability__body { align-items: stretch; flex-direction: column; }
+  .groups-availability__info { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .groups-availability__body .switch { align-self: flex-end; }
   .admin-toolbar { align-items: stretch; flex-direction: column; }
   .admin-search { width: 100%; }
   .admin-toolbar > div:last-child { display: grid; grid-template-columns: 1fr 1fr; }

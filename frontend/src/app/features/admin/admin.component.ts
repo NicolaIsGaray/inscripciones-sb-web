@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
 import { StudentService, ImportResult } from '../../service/student.service';
 import { GroupService } from '../../service/group.service';
+import { SettingsService } from '../../service/settings.service';
 import { Student } from '../../model/student';
 import { Group } from '../../model/group';
 import { IconComponent } from '../../shared/components/icon/icon.component';
@@ -45,6 +46,8 @@ export class AdminComponent implements OnInit {
   editingStudent = signal<AdminStudent | null>(null);
   isNewStudent = signal(false);
   notice = signal('');
+  groupsEnabled = signal(false);
+  savingGroups = signal(false);
 
   // Importación desde Excel
   importResult = signal<ImportResult | null>(null);
@@ -54,6 +57,7 @@ export class AdminComponent implements OnInit {
     private authService: AuthService,
     private studentService: StudentService,
     private groupService: GroupService,
+    private settingsService: SettingsService,
     private router: Router
   ) {}
 
@@ -98,6 +102,12 @@ export class AdminComponent implements OnInit {
       error: () => {
         this.showNotice('Error al cargar grupos');
       }
+    });
+
+    // Disponibilidad de grupos: la controla el secretario desde este panel
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => this.groupsEnabled.set(settings.groupsEnabled === true),
+      error: () => this.groupsEnabled.set(false)
     });
   }
 
@@ -259,6 +269,29 @@ export class AdminComponent implements OnInit {
         this.showNotice('Grupo eliminado correctamente.');
       },
       error: () => this.showNotice('Error al eliminar grupo')
+    });
+  }
+
+  // Disponibilidad de grupos
+  toggleGroupsEnabled(): void {
+    if (this.savingGroups()) return;
+    const desired = !this.groupsEnabled();
+
+    this.savingGroups.set(true);
+    this.settingsService.updateSettings({ groupsEnabled: desired }).subscribe({
+      next: (settings) => {
+        this.groupsEnabled.set(settings.groupsEnabled);
+        this.savingGroups.set(false);
+        this.showNotice(
+          settings.groupsEnabled
+            ? 'Formación de grupos habilitada.'
+            : 'Formación de grupos deshabilitada.'
+        );
+      },
+      error: () => {
+        this.savingGroups.set(false);
+        this.showNotice('No se pudo actualizar la disponibilidad de grupos.');
+      }
     });
   }
 

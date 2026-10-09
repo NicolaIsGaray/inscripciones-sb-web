@@ -1,43 +1,48 @@
-<div class="app">
+<div class="app" [class.app--admin]="isAdmin()">
   <span class="sr-only" aria-live="polite">Página actual: A</span>
   
   <!-- Header Component / Navigation -->
-  <header class="topbar">
-    <button class="brand" routerLink="/inicio" aria-label="Ir al inicio">
-      <span class="brand__mark">
-        <img src="logoSB.png" alt="Escuela Libertador Simón Bolívar 4-084" />
-      </span>
-      <span>
-        <strong>Libertador Simón Bolívar</strong>
-        <small>Escuela Secundaria 4-084</small>
-      </span>
-    </button>
-    
-    <nav class="desktop-nav" aria-label="Navegación principal">
+  @if (!isAdmin()) {
+    <header class="topbar">
+      <button class="brand" routerLink="/inicio" aria-label="Ir al inicio">
+        <span class="brand__mark">
+          <img src="logoSB.png" alt="Escuela Libertador Simón Bolívar 4-084" />
+        </span>
+        <span>
+          <strong>Libertador Simón Bolívar</strong>
+          <small>Escuela Secundaria 4-084</small>
+        </span>
+      </button>
+      
+      <nav class="desktop-nav" aria-label="Navegación principal">
+        @for (item of navItems; track item.route) {
+          <button [class.active]="currentPage() === item.route" routerLink={{item.route}}>
+            {{ item.label }}
+          </button>
+        }
+      </nav>
+      <span class="cycle-pill">Ciclo 2027</span>
+    </header>
+
+    <nav class="mobile-nav" aria-label="Navegación principal">
       @for (item of navItems; track item.route) {
         <button [class.active]="currentPage() === item.route" routerLink={{item.route}}>
-          {{ item.label }}
+          <app-icon [name]="item.icon" [size]="20" />
+          <span>{{ item.label }}</span>
         </button>
       }
     </nav>
-    <span class="cycle-pill">Ciclo 2027</span>
-  </header>
-
-  <nav class="mobile-nav" aria-label="Navegación principal">
-    @for (item of navItems; track item.route) {
-      <button [class.active]="currentPage() === item.route" routerLink={{item.route}}>
-        <span>{{ item.label }}</span>
-      </button>
-    }
-  </nav>
+  }
 
   <router-outlet></router-outlet>
 
-  <footer>
-    <div class="footer-brand">
-      <span><img src="logoSB.png" alt="Logo" /></span>
-      <div><strong>Libertador Simón Bolívar</strong><small>Escuela Secundaria 4-084</small></div>
-    </div>
-    <p>Inscripciones ciclo lectivo 2027 · Mendoza</p>
-  </footer>
+  @if (!isAdmin()) {
+    <footer>
+      <div class="footer-brand">
+        <span><img src="logoSB.png" alt="Logo" /></span>
+        <div><strong>Libertador Simón Bolívar</strong><small>Escuela Secundaria 4-084</small></div>
+      </div>
+      <p>Inscripciones ciclo lectivo 2027 · Mendoza</p>
+    </footer>
+  }
 </div>

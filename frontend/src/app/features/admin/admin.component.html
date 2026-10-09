@@ -6,6 +6,10 @@
         <strong>Panel administrativo</strong>
         <small>Ciclo lectivo 2027</small>
       </div>
+      <!-- Salida compacta: solo visible en móvil, donde no se muestra .admin-exit -->
+      <button class="admin-signout" type="button" (click)="logout()" aria-label="Cerrar sesión">
+        <app-icon name="arrow" [size]="15"></app-icon> Cerrar Sesión
+      </button>
     </div>
     <nav aria-label="Secciones administrativas">
       <button [class.active]="section() === 'resumen'" (click)="setSection('resumen')">
@@ -18,7 +22,7 @@
         <app-icon name="school"></app-icon> Grupos <span>{{ groups().length }}</span>
       </button>
     </nav>
-    <button class="admin-exit" (click)="logout()">← Volver al sitio</button>
+    <button class="admin-exit" (click)="logout()">← Cerrar Sesión</button>
   </aside>
 
   <section class="admin-content">
@@ -76,6 +80,43 @@
           </div>
         </article>
       </div>
+
+      <article class="admin-panel groups-availability">
+        <div class="panel-title">
+          <div>
+            <span class="eyebrow">Disponibilidad</span>
+            <h2>Formación de grupos</h2>
+          </div>
+        </div>
+        <div class="groups-availability__body">
+          <div class="groups-availability__info">
+            <span class="groups-availability__state" [class.is-open]="groupsEnabled()">
+              <app-icon [name]="groupsEnabled() ? 'users' : 'clock'" [size]="18"></app-icon>
+              {{ groupsEnabled() ? 'Habilitada' : 'Inhabilitada' }}
+            </span>
+            <p>
+              @if (groupsEnabled()) {
+                Los ingresantes pueden crear y unirse a grupos: la sección Grupos muestra la etapa
+                como abierta.
+              } @else {
+                La formación de grupos está cerrada: los ingresantes ven el aviso de que todavía no
+                está disponible.
+              }
+            </p>
+          </div>
+          <button
+            class="switch"
+            type="button"
+            role="switch"
+            [attr.aria-checked]="groupsEnabled()"
+            [class.on]="groupsEnabled()"
+            [disabled]="savingGroups()"
+            (click)="toggleGroupsEnabled()"
+          >
+            <span></span>
+          </button>
+        </div>
+      </article>
 
       <div class="overview-grid">
         <article class="admin-panel">
