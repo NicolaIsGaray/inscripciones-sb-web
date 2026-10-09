@@ -29,6 +29,7 @@
 
         <!-- Primera instancia: matriz de categorías -->
         @if (stage.categories) {
+          <div class="stage-matrix-wrap" tabindex="0" role="group" aria-label="Fechas de la primera instancia, deslizable en horizontal">
           <div class="stage-matrix">
             <div class="stage-matrix__head">
               <span>Categoría</span>
@@ -60,6 +61,11 @@
               </div>
             }
           </div>
+          </div>
+          <p class="stage-matrix-hint">
+            <app-icon name="arrow" [size]="14" />
+            Deslizá la tabla para ver todas las categorías
+          </p>
         }
 
         <!-- Instancias 2, 3 y 4: lista de fechas -->
