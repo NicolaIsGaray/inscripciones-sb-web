@@ -105,51 +105,6 @@ Para generar el hash bcrypt de la contraseña:
 htpasswd -bnBC 10 "" TU_CONTRASENA | tr -d ':\n'
 ```
 
-### Frontend
-
-| Variable | Cuándo | Descripción |
-|----------|--------|-------------|
-| `API_URL` | Solo en build de Render | URL base de la API. El script `scripts/set-api-url.js` la inyecta en `environment.prod.ts` |
-
-En desarrollo no hace falta: `ng serve` usa `environment.ts`, que ya apunta a
-`http://localhost:8080/api`.
-
-Para compilar a mano contra otro destino:
-
-```bash
-cd frontend
-API_URL=https://mi-api.onrender.com npm run build:render
-```
-
-## Despliegue en Render
-
-El repositorio incluye un [`render.yaml`](./render.yaml) que define los dos servicios.
-
-1. Subí el código a GitHub (el `.env` ya está en `.gitignore`).
-2. En Render: **New → Blueprint**, apuntando al repositorio.
-3. Render te va a pedir los valores `sync: false`:
-   - `MONGODB_URI` — la URI de Atlas
-   - `ADMIN_USERNAME` — el usuario del dashboard
-   - `ADMIN_PASSWORD` — el hash bcrypt entre comillas simples
-4. `JWT_SECRET` se genera solo.
-5. `API_URL` y `ALLOWED_ORIGINS` se completan automáticamente con los hostnames
-   públicos de cada servicio.
-
-### Qué queda como está
-
-| Servicio | Plan | Build | Start | Publicación |
-|----------|------|-------|-------|-------------|
-| `inscripciones-sb-api` | free | `go build -o api .` | `./api` | — |
-| `inscripciones-sb` | free (static) | `npm ci && npm run build:render` | — | `dist/sb-web/browser` |
-
-El sitio estático declara una regla `rewrite /* → /index.html` para que las rutas
-de Angular (`/fechas`, `/grupos`, `/admin`) funcionen al entrar directo por URL.
-
-> **Nota sobre el plan gratuito**: los web services de Render se suspenden tras
-> ~15 minutos de inactividad y tardan ~1 minuto en volver. La primera visita
-> después de un rato pausado va a ser lenta. Si molesta en producción, conviene
-> pasar el servicio de la API al plan Hobby.
-
 ## Licencia
 
 Proyecto educativo - Escuela Simón Bolívar 4-084
